@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CatchStar</title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    /* #canvasWrap {
+        width: 800px;
+        margin:0 auto;
+        position: relative;
+    } */
+    #canvas2{
+    	position: absolute;
+    	top:0;
+    	left: 0;
+    }
+    </style>
+    <script src="CatchStar.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div id="canvasWrap">
+        <audio src="audio/jump.mp3" id="jumpAudio"></audio>
+        <audio src="audio/score.mp3" id="scoreAudio"></audio>
+        <canvas width="800" height="600" id="canvas1">不支持Canvas</canvas>
+        <canvas width="800" height="600" id="canvas2"></canvas>
+    </div>
+</body>
+
+</html>
