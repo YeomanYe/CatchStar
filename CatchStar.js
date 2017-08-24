@@ -1,6 +1,8 @@
 window.onload = game;
 
 var evt = "onorientationchange" in window ? "orientationchange" : "resize";
+//移动事件
+var touchstartHandler,touchendHandler,restartGameHandler;
 
 window.addEventListener(evt, function() {
     console.log(evt);
@@ -44,7 +46,7 @@ var INIT_PLAYER_VX = 0,
     PLAYER_JUMP_HEIGHT = -(INIT_PLAYER_VY * JUMP_TIME + JUMP_TIME * JUMP_TIME * INIT_PLAYER_ACCELY / 2);
 //最大速度,默认加速度增量   
 var MAX_PLAYER_VX = 8,
-    DEFAULT_ACCLE_INC = 0.07;
+    DEFAULT_ACCLE_INC = 0.05;
 //星星消失速率
 var STAR_DEAD_RATE = 0.005;
 //分值
@@ -140,7 +142,7 @@ function gameInit() {
                     }
 
                 };
-                canvas2.addEventListener("touchstart", function(event) {
+                touchstartHandler =  function(event) {
                     event.preventDefault();
                     console.log(event, screenWidth);
                     if (event.touches[0].clientY < screenHeight / 2) {
@@ -148,11 +150,13 @@ function gameInit() {
                     } else {
                         player.accelX += DEFAULT_ACCLE_INC;
                     }
-                });
-                canvas2.addEventListener("touchend", function(event) {
+                };
+                touchendHandler =function(event) {
                     event.preventDefault();
                     player.accelX = 0;
-                });
+                };
+                canvas2.addEventListener("touchstart",touchstartHandler);
+                canvas2.addEventListener("touchend", touchendHandler);
                 //绘制星星
                 star = new starObj();
                 star.sprite.src = "images/star.png";
@@ -373,9 +377,12 @@ function gameOver() {
     ctx2.fillText("Click to restar", canWidth * 0.5 - 15 * 10, canHeight * 0.5);
     window.onkeyup = null;
     window.onkeydown = null;
+    
+    var canvas2 = document.getElementById("canvas2");
+    canvas2.removeEventListener("touchstart",touchstartHandler);
+    canvas2.removeEventListener("touchend",touchendHandler);
 
     //点击重开游戏
-    var canvas2 = document.getElementById("canvas2");
     canvas2.style.cursor = "pointer";
     /*    canvas2.onclick = function() {
             isOver = false;
@@ -384,7 +391,11 @@ function gameOver() {
             canvas2.onclick = null;
             canvas2.ontouchend = null;
         };*/
-    var restartGameHandler = function(event) {
+    if(restartGameHandler){
+        canvas2.removeEventListener("click", restartGameHandler);
+        canvas2.removeEventListener("touchend", restartGameHandler);
+    }
+    restartGameHandler = function(event) {
         event.preventDefault();
         console.log("ontouchend")
         isOver = false;
