@@ -1,5 +1,34 @@
 window.onload = game;
 
+var evt = "onorientationchange" in window ? "orientationchange" : "resize";
+
+window.addEventListener(evt, function() {
+    console.log(evt);
+    var width = document.documentElement.clientWidth;
+    var height = document.documentElement.clientHeight;
+    var canvasList = document.getElementsByTagName("canvas");
+    if (width > height) {
+        for (var i = 0, len = canvasList.length; i < len; i++) {
+            canvasList[i].width = width;
+            canvasList[i].height = height;
+            canvasList[i].style.top = 0;
+            canvasList[i].style.left = 0;
+            canvasList[i].style.transform = 'none';
+            canvasList[i].style.transformOrigin = "50% 50%";
+        }
+    } else {
+        for (var i = 0, len = canvasList.length; i < len; i++) {
+            canvasList[i].width = width;
+            canvasList[i].height = height;
+            canvasList[i].style.top = (height - width) / 2;
+            canvasList[i].style.left = (width - height) / 2;
+            canvasList[i].style.transform = 'rotate(90deg)';
+            canvasList[i].style.transformOrigin = "50% 50%";
+        }
+    }
+
+}, false);
+
 //ctx1在下
 var ctx1, ctx2;
 //canvas的宽高
@@ -15,7 +44,7 @@ var INIT_PLAYER_VX = 0,
     PLAYER_JUMP_HEIGHT = -(INIT_PLAYER_VY * JUMP_TIME + JUMP_TIME * JUMP_TIME * INIT_PLAYER_ACCELY / 2);
 //最大速度,默认加速度增量   
 var MAX_PLAYER_VX = 8,
-    DEFAULT_ACCLE_INC = 0.02;
+    DEFAULT_ACCLE_INC = 0.07;
 //星星消失速率
 var STAR_DEAD_RATE = 0.005;
 //分值
@@ -26,14 +55,14 @@ var isOver = false,
 //设置捕获半径
 var PICK_RADIUS = 100;
 //屏幕宽高
-var screenWidth,screenHeight;
+var screenWidth, screenHeight;
 
 function game() {
     gameInit();
     gameLoop();
 }
 //音效
-var jumpAudio,scoreAudio;
+var jumpAudio, scoreAudio;
 //游戏初始化
 function gameInit() {
     var canvas1 = document.getElementById("canvas1"),
@@ -44,8 +73,26 @@ function gameInit() {
     screenWidth = window.innerWidth;
     screenHeight = window.innerHeight;
 
-    canvas1.width = canvas2.width = screenWidth;
-    canvas1.height = canvas2.height = screenHeight;
+    var canvasList = document.getElementsByTagName("canvas");
+    if (screenWidth < screenHeight) {
+        var width = screenWidth,
+            height = screenHeight;
+        for (var i = 0, len = canvasList.length; i < len; i++) {
+            canvasList[i].width = height;
+            canvasList[i].height = width;
+            canvasList[i].style.marginLeft = (width - height)/2 + "px";
+            canvasList[i].style.marginTop = (height - width)/2 + "px";
+            // canvasList[i].style.top = (height - width) / 2 + "px";
+            // canvasList[i].style.left = (width - height)/2 + "px";
+            canvasList[i].style.transform = 'rotate(90deg)';
+            canvasList[i].style.transformOrigin = "50% 50%";
+        }
+    } else {
+        canvas1.width = canvas2.width = screenWidth;
+        canvas1.height = canvas2.height = screenHeight;
+    }
+
+
 
 
     canWidth = canvas1.offsetWidth;
@@ -55,6 +102,7 @@ function gameInit() {
     scoreAudio = document.getElementById("scoreAudio");
 
     isReady = false;
+
 
     bgImg.src = "images/background.jpg";
     bgImg.onload = function() {
@@ -87,13 +135,24 @@ function gameInit() {
                 window.onkeyup = function(event) {
                     event = event || window.event;
                     var keyCode = event.keyCode;
-                    if (keyCode == 65) {
-                        player.accelX = 0;
-                    } else if (keyCode == 68) {
+                    if (keyCode == 65 || keyCode == 68) {
                         player.accelX = 0;
                     }
 
                 };
+                canvas2.addEventListener("touchstart", function(event) {
+                    event.preventDefault();
+                    console.log(event, screenWidth);
+                    if (event.touches[0].clientY < screenHeight / 2) {
+                        player.accelX += -DEFAULT_ACCLE_INC;
+                    } else {
+                        player.accelX += DEFAULT_ACCLE_INC;
+                    }
+                });
+                canvas2.addEventListener("touchend", function(event) {
+                    event.preventDefault();
+                    player.accelX = 0;
+                });
                 //绘制星星
                 star = new starObj();
                 star.sprite.src = "images/star.png";
@@ -125,9 +184,9 @@ function gameLoop() {
         }
 
         //绘制特效
-        if(effectStar){
+        if (effectStar) {
             effectStar.draw();
-            if(effectStar.x[0] == effectStar.x[1]){
+            if (effectStar.x[0] == effectStar.x[1]) {
                 effectStar = null;
             }
         }
@@ -151,7 +210,7 @@ function drawBackground() {
         bgWidth = canWidth;
         bgHeight = canHeight;
     }*/
-    ctx1.drawImage(bgImg,0,0,canWidth,canHeight);
+    ctx1.drawImage(bgImg, 0, 0, canWidth, canHeight);
 
 }
 
@@ -208,7 +267,7 @@ playerObj.prototype.draw = function() {
 
     ctx2.drawImage(this.sprite, this.x, this.y + 10, this.width, this.height);
 
-    if(this.y+this.height === ground.y){
+    if (this.y + this.height === ground.y) {
         jumpAudio.play();
     }
 
@@ -283,7 +342,7 @@ function starPlayerCollision() {
     if (PICK_RADIUS > getDest(star.centerX, star.centerY, player.centerX, player.centerY)) {
         //碰撞特效
         effectStar = new effectStarObj();
-        effectStar.init(star.centerX,star.centerY);
+        effectStar.init(star.centerX, star.centerY);
         //得分音效
         scoreAudio.play();
         data.num++;
@@ -318,17 +377,37 @@ function gameOver() {
     //点击重开游戏
     var canvas2 = document.getElementById("canvas2");
     canvas2.style.cursor = "pointer";
-    canvas2.onclick = function() {
+    /*    canvas2.onclick = function() {
+            isOver = false;
+            canvas2.style.cursor = "default";
+            gameInit();
+            canvas2.onclick = null;
+            canvas2.ontouchend = null;
+        };*/
+    var restartGameHandler = function(event) {
+        event.preventDefault();
+        console.log("ontouchend")
         isOver = false;
         canvas2.style.cursor = "default";
         gameInit();
-        canvas2.onclick = null;
+        canvas2.removeEventListener("click", restartGameHandler);
+        canvas2.removeEventListener("touchend", restartGameHandler);
+    }
+    canvas2.addEventListener("click", restartGameHandler);
+    canvas2.addEventListener("touchend", restartGameHandler);
+    //绘制星星
+    star = new starObj();
+    star.sprite.src = "images/star.png";
+    star.sprite.onload = function() {
+        star.init();
+        star.draw();
+        isReady = true;
     };
 }
 
 /*星星爆炸特效*/
 var effectStar;
-var effectStarObj = function(){
+var effectStarObj = function() {
     this.x = [];
     this.y = [];
     this.width = 0;
@@ -336,37 +415,37 @@ var effectStarObj = function(){
     this.opacity = 1;
 };
 
-effectStarObj.prototype.init = function(x,y){
-    for(var i=0;i<4;i++){
-        this.x[i] = (x+star.width/2)-(i%2+1)*star.width/2;
-        this.y[i] = (y+star.height/2)-star.height;
-        if(i>=2){
-            this.y[i] = (y+star.height/2)-1*star.height/2;
+effectStarObj.prototype.init = function(x, y) {
+    for (var i = 0; i < 4; i++) {
+        this.x[i] = (x + star.width / 2) - (i % 2 + 1) * star.width / 2;
+        this.y[i] = (y + star.height / 2) - star.height;
+        if (i >= 2) {
+            this.y[i] = (y + star.height / 2) - 1 * star.height / 2;
         }
     }
     this.width = star.width;
     this.height = star.height;
 };
 
-effectStarObj.prototype.draw = function(){
+effectStarObj.prototype.draw = function() {
     ctx2.save();
     ctx2.globalAlpha = this.opacity;
-    for(var i=0;i<this.x.length;i++){
-        ctx2.drawImage(star.sprite,this.x[i],this.y[i],this.width,this.height);
+    for (var i = 0; i < this.x.length; i++) {
+        ctx2.drawImage(star.sprite, this.x[i], this.y[i], this.width, this.height);
     }
     ctx2.restore();
-    this.opacity -=0.05;
-    this.width -=1;
-    this.height -=1;
-    for(i=0;i<this.x.length;i++){
-        if(i%2){
+    this.opacity -= 0.05;
+    this.width -= 1;
+    this.height -= 1;
+    for (i = 0; i < this.x.length; i++) {
+        if (i % 2) {
             this.x[i]++;
-        }else{
+        } else {
             this.x[i]--;
         }
-        if(i>=2){
+        if (i >= 2) {
             this.y[i]--;
-        }else{
+        } else {
             this.y[i]++;
         }
     }
