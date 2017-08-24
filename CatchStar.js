@@ -6,8 +6,8 @@ var touchstartHandler,touchendHandler,restartGameHandler;
 
 window.addEventListener(evt, function() {
     console.log(evt);
-    var width = document.documentElement.clientWidth;
-    var height = document.documentElement.clientHeight;
+    var width = window.innerWidth;
+    var height = window.innerHeight;
     var canvasList = document.getElementsByTagName("canvas");
     if (width > height) {
         for (var i = 0, len = canvasList.length; i < len; i++) {
@@ -20,10 +20,12 @@ window.addEventListener(evt, function() {
         }
     } else {
         for (var i = 0, len = canvasList.length; i < len; i++) {
-            canvasList[i].width = width;
-            canvasList[i].height = height;
-            canvasList[i].style.top = (height - width) / 2;
-            canvasList[i].style.left = (width - height) / 2;
+            canvasList[i].width = height;
+            canvasList[i].height = width;
+            canvasList[i].style.marginLeft = (width - height)/2 + "px";
+            canvasList[i].style.marginTop = (height - width)/2 + "px";
+      /*      canvasList[i].style.top = (height - width) / 2;
+            canvasList[i].style.left = (width - height) / 2;*/
             canvasList[i].style.transform = 'rotate(90deg)';
             canvasList[i].style.transformOrigin = "50% 50%";
         }
@@ -127,9 +129,9 @@ function gameInit() {
                     console.log(event.keyCode);
                     event = event || window.event;
                     var keyCode = event.keyCode;
-                    if (keyCode == 65) {
+                    if (keyCode == 65 || keyCode == 37) {
                         player.accelX += -DEFAULT_ACCLE_INC;
-                    } else if (keyCode == 68) {
+                    } else if (keyCode == 68 || keyCode == 39) {
                         player.accelX += DEFAULT_ACCLE_INC;
                     }
                 };
@@ -137,7 +139,7 @@ function gameInit() {
                 window.onkeyup = function(event) {
                     event = event || window.event;
                     var keyCode = event.keyCode;
-                    if (keyCode == 65 || keyCode == 68) {
+                    if (keyCode == 65 || keyCode == 68 || keyCode == 37 || keyCode ==39) {
                         player.accelX = 0;
                     }
 
