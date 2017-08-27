@@ -92,8 +92,9 @@ function gameInit() {
             canvasList[i].style.transformOrigin = "50% 50%";
         }
     } else {
-        canvas1.width = canvas2.width = screenWidth;
-        canvas1.height = canvas2.height = screenHeight;
+        //-10刚好不出现滚动条
+        canvas1.width = canvas2.width = screenWidth - 10;
+        canvas1.height = canvas2.height = screenHeight - 10;
     }
 
 
