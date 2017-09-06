@@ -4,8 +4,8 @@ var evt = "onorientationchange" in window ? "orientationchange" : "resize";
 //移动事件
 var touchstartHandler,touchendHandler,restartGameHandler;
 
+//保证屏幕旋转后不会受到影响
 window.addEventListener(evt, function() {
-    console.log(evt);
     var width = window.innerWidth;
     var height = window.innerHeight;
     var canvasList = document.getElementsByTagName("canvas");
@@ -24,8 +24,6 @@ window.addEventListener(evt, function() {
             canvasList[i].height = width;
             canvasList[i].style.marginLeft = (width - height)/2 + "px";
             canvasList[i].style.marginTop = (height - width)/2 + "px";
-      /*      canvasList[i].style.top = (height - width) / 2;
-            canvasList[i].style.left = (width - height) / 2;*/
             canvasList[i].style.transform = 'rotate(90deg)';
             canvasList[i].style.transformOrigin = "50% 50%";
         }
@@ -86,8 +84,6 @@ function gameInit() {
             canvasList[i].height = width;
             canvasList[i].style.marginLeft = (width - height)/2 + "px";
             canvasList[i].style.marginTop = (height - width)/2 + "px";
-            // canvasList[i].style.top = (height - width) / 2 + "px";
-            // canvasList[i].style.left = (width - height)/2 + "px";
             canvasList[i].style.transform = 'rotate(90deg)';
             canvasList[i].style.transformOrigin = "50% 50%";
         }
@@ -204,19 +200,6 @@ function gameLoop() {
 var bgImg = new Image();
 //绘制背景
 function drawBackground() {
-    /*var bgWidth,bgHeight;
-    if(screenHeight > screenWidth) {
-        ctx1.rotate(Math.PI/180 * 90);
-        bgWidth = canWidth;
-        bgHeight = canHeight;
-        ctx1.drawImage(bgImg, -bgWidth, -bgHeight, bgHeight, bgWidth);
-        // ctx1.translate(canWidth/2,canHeight/2);
-        ctx1.rotate(Math.PI/180 * 270);
-    }else{
-        ctx1.drawImage(bgImg, 0, 0, bgWidth, bgHeight);
-        bgWidth = canWidth;
-        bgHeight = canHeight;
-    }*/
     ctx1.drawImage(bgImg, 0, 0, canWidth, canHeight);
 
 }
@@ -465,9 +448,7 @@ effectStarObj.prototype.draw = function() {
     }
 };
 
-/*
-工具函数
- */
+// 获取动画帧函数
 window.requestAnimFrame = (function() {
     return window.requestAnimationFrame || window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
@@ -475,7 +456,7 @@ window.requestAnimFrame = (function() {
             return window.setTimeout(callback, 1000 / 60);
         };
 })();
-
+// 获得两点间距离
 function getDest(x1, y1, x2, y2) {
     return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }
